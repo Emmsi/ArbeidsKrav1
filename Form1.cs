@@ -18,13 +18,19 @@ namespace ArbeidsKrav1
             InitializeComponent();
         }
 
+        // Global Variables
+        string[] instrumentConfigs;
+        List<MeasurementPointRaw> allMeasuredPointsRaw = new List<MeasurementPointRaw>();
+        List<MeasurementPointScaled> allMeasuredPointsScaled = new List<MeasurementPointScaled>();
+
         // Form Layout
         private void FormMain_Load(object sender, EventArgs e)
         {
+            instrumentConfigs = new string[5];
+            panelDashboard.Visible = true;
             panelData.Visible = false;
             panelConfiguration.Visible = false;
-
-            textBoxSetupInfo.AppendText("Fyll inn info bla bla for å koble til arduinoen din");
+ 
         }
 
         private void buttonDashboard_Click(object sender, EventArgs e)
@@ -32,8 +38,11 @@ namespace ArbeidsKrav1
             panelPick.Height = buttonDashboard.Height;
             panelPick.Top = buttonDashboard.Top;
 
+            panelDashboard.Visible = true;
             panelData.Visible = false;
             panelConfiguration.Visible = false;
+
+            timerStatus.Enabled = false;
         }
 
         private void buttonData_Click(object sender, EventArgs e)
@@ -41,8 +50,11 @@ namespace ArbeidsKrav1
             panelPick.Height = buttonData.Height;
             panelPick.Top = buttonData.Top;
 
+            panelDashboard.Visible = false;
             panelData.Visible = true;
             panelConfiguration.Visible = false;
+
+            timerStatus.Enabled = true;
         }
 
         private void buttonSetup_Click(object sender, EventArgs e)
@@ -50,24 +62,40 @@ namespace ArbeidsKrav1
             panelPick.Height = buttonConfiguration.Height;
             panelPick.Top = buttonConfiguration.Top;
 
+            panelDashboard.Visible = false;
             panelData.Visible = false;
             panelConfiguration.Visible = true;
+
+            timerStatus.Enabled = false;
         }
 
         // CONFIGURATION PANEL
-
         // Setup
         private void buttonConnect_Click(object sender, EventArgs e)
         {
-            serialPortMain.BaudRate = int.Parse(comboBoxBit.Text);
-            serialPortMain.PortName = comboBoxPort.Text;
+            try
+            {
+                serialPortMain.PortName = comboBoxPort.Text;
+                serialPortMain.BaudRate = Convert.ToInt32(comboBoxBit.Text);
 
-            serialPortMain.Open();
+                serialPortMain.Open();
+                radioButtonConnected.Checked = true;
+
+            }
+            catch (Exception err)
+            {
+                MessageBox.Show(err.Message, "Unable to connect", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                radioButtonConnected.Checked = false;
+            }
         }
 
         private void buttonDisconnect_Click(object sender, EventArgs e)
         {
-            serialPortMain.Close();
+            if (serialPortMain.IsOpen)
+            {
+                radioButtonConnected.Checked = false;
+                serialPortMain.Close();
+            }
         }
 
         // COM Port
@@ -82,93 +110,384 @@ namespace ArbeidsKrav1
             }
         }
 
+        // Receive
         private void buttonReceive_Click(object sender, EventArgs e)
         {
-            string indata = serialPortMain.ReadExisting();
-            textBoxReceive.AppendText(indata);
+            if (serialPortMain.IsOpen)
+            {
+                textBoxResult.Clear();
+
+                // string writeString = "writeconf>" + passwordString + ">" + textBoxTagname.Text + ";" + textBoxLRV.Text + ";" + textBoxURV.Text + ";" + textBoxAL.Text + ";" + textBoxAH.Text + ";";
+
+                string indata = serialPortMain.ReadExisting();
+                textBoxResult.AppendText(indata);
+
+                if (textBoxSend.Text == "readconf" && textBoxResult.Text.Length <= 30 && textBoxResult.Text.Length >= 16)
+                {
+                    MessageBox.Show("Configuration received");
+                }
+
+                else if (textBoxSend.Text == "readconf" && textBoxResult.Text.Length < 16 || textBoxSend.Text == "readconf" && textBoxResult.Text.Length > 30)
+                {
+                    textBoxResult.Clear();
+                    MessageBox.Show("Error receiving configuration");
+                }
+
+                else if (textBoxSend.Text.Contains("writeconf"))
+                {
+                    if (indata == "1")
+                    {
+                        MessageBox.Show("Password is correct. Configuration has been updated");
+                    }
+
+                    if (indata == "0")
+                    {
+                        MessageBox.Show("Password is incorrect. Please try again");
+                    }
+                }
+
+                textBoxSend.Clear();
+                serialPortMain.DiscardInBuffer();
+                serialPortMain.DiscardOutBuffer();
+
+            }
         }
 
+        // Send
         private void buttonSend_Click(object sender, EventArgs e)
         {
-            serialPortMain.WriteLine(textBoxSend.Text);
-            textBoxSend.Clear();
+            if (serialPortMain.IsOpen)
+            {
+                serialPortMain.WriteLine(textBoxSend.Text);
+
+                if (textBoxSend.Text.Contains("writeconf"))
+                {
+                    panelPassword.Visible = true;
+                }
+            }
+        }
+
+        // Update Config
+        private void buttonOpen_Click(object sender, EventArgs e)
+        {
+            for (int i = 0; i < instrumentConfigs.Length; i++)
+            {
+                switch (i)
+                {
+                    case 0:
+                        if (textBoxTagname.Text == "")
+                        {
+                            MessageBox.Show("Configuration empty");
+                            textBoxTagname.Focus();
+                        }
+                        break;
+                    case 1:
+                        if (textBoxLRV.Text == "")
+                        {
+                            MessageBox.Show("Configuration empty");
+                            textBoxLRV.Focus();
+                        }
+                        break;
+
+                    case 2:
+                        if (textBoxURV.Text == "")
+                        {
+                            MessageBox.Show("Configuration empty");
+                            textBoxURV.Focus();
+                        }
+                        break;
+                    case 3:
+                        if (textBoxAL.Text == "")
+                        {
+                            MessageBox.Show("Configuration empty");
+                            textBoxAL.Focus();
+                        }
+                        break;
+                    case 4:
+                        if (textBoxAH.Text == "")
+                        {
+                            MessageBox.Show("Configuration empty");
+                            textBoxAH.Focus();
+                        }
+                        break;
+
+                    default:
+                        instrumentConfigs[i] = textBoxTagname.Text;
+                        instrumentConfigs[i] = textBoxLRV.Text;
+                        instrumentConfigs[i] = textBoxURV.Text;
+                        instrumentConfigs[i] = textBoxAL.Text;
+                        instrumentConfigs[i] = textBoxAH.Text;
+                        break;
+                }
+            }
+        }
+
+        // Save Config
+        private void buttonSaveFile_Click(object sender, EventArgs e)
+        {
+            // Open directory 
+            saveFileDialogConfig.InitialDirectory = @"C:\Users\";
+            saveFileDialogConfig.Filter = "ssc files (*.ssc)|*.ssc|All files (*.*)|*.*";
+            saveFileDialogConfig.FilterIndex = 2;
+            saveFileDialogConfig.RestoreDirectory = true;
+            saveFileDialogConfig.FileName = "configuration.ssc";
+
+            // Default save as txt
+            saveFileDialogConfig.DefaultExt = "*.ssc";
+
+            if (saveFileDialogConfig.ShowDialog() == DialogResult.OK)
+            {
+                File.WriteAllText(saveFileDialogConfig.FileName, textBoxTagname.Text + ";" + textBoxLRV.Text
+                                      + ";" + textBoxURV.Text + ";" + textBoxAL.Text + ";" + textBoxAH.Text + ";");
+            }
         }
 
 
 
-        // Open AND Select a File
-        private void buttonOpen_Click(object sender, EventArgs e)
+        // GRAF OG DATA
+        private void buttonAutoGraph_Click(object sender, EventArgs e)
+        {
+            timerChartAddRaw.Enabled = true;
+        }
+
+        private void buttonAutoGraphScaled_Click(object sender, EventArgs e)
+        {
+            timerChartAddScaled.Enabled = true;
+        }
+
+        private void timerChartAdd_Tick(object sender, EventArgs e)
+        {
+            if (serialPortMain.IsOpen)
+            {
+                serialPortMain.WriteLine("readraw");
+
+                timerSerialReceiveRaw.Enabled = true;
+                timerChartAddRaw.Enabled = false;
+            }
+        }
+
+        private void timerChartAddScaled_Tick(object sender, EventArgs e)
+        {
+            if (serialPortMain.IsOpen)
+            {
+                serialPortMain.WriteLine("readscaled");
+
+                timerSerialReceiveScaled.Enabled = true;
+                timerChartAddScaled.Enabled = false;
+            }
+        }
+
+        private void timerSerialReceive_Tick(object sender, EventArgs e)
+        {
+            if (serialPortMain.IsOpen)
+            {
+                if (serialPortMain.BytesToRead > 0)
+                {
+                    string rawData = serialPortMain.ReadExisting();
+                    textBoxDataRaw.AppendText(rawData + "\r\n");
+
+                    MeasurementPointRaw measuredPoint;
+                    measuredPoint = new MeasurementPointRaw(DateTime.Now.ToLongTimeString(), int.Parse(rawData));
+
+                    chartRaw.Series[0].Points.AddXY(measuredPoint.time, measuredPoint.raw);
+                    allMeasuredPointsRaw.Add(measuredPoint);
+
+                    timerChartAddRaw.Enabled = true;
+                    timerSerialReceiveRaw.Enabled = false;
+                }
+            }
+        }
+
+        private void timerSerialReceiveScaled_Tick(object sender, EventArgs e)
+        {
+            if (serialPortMain.IsOpen)
+            {
+                if (serialPortMain.BytesToRead > 0)
+                {
+                    string scaledData = serialPortMain.ReadExisting();
+                    textBoxDataScaled.AppendText(scaledData + "\r\n");
+
+                    MeasurementPointScaled MeasuredPoint;
+                    MeasuredPoint = new MeasurementPointScaled(DateTime.Now.ToLongTimeString(), Convert.ToDouble(scaledData.Replace(".", ",")));
+
+                    chartScaled.Series[0].Points.AddXY(MeasuredPoint.time, MeasuredPoint.scaled);
+                    allMeasuredPointsScaled.Add(MeasuredPoint);
+
+                    timerChartAddScaled.Enabled = true;
+                    timerSerialReceiveScaled.Enabled = false;
+                }
+            }
+        }
+
+        private void buttonStopAuto_Click(object sender, EventArgs e)
+        {
+            timerSerialReceiveRaw.Enabled = false;
+            timerChartAddRaw.Enabled = false;
+
+            serialPortMain.DiscardInBuffer();
+            serialPortMain.DiscardOutBuffer();
+        }
+
+        private void buttonStopAutoScaled_Click(object sender, EventArgs e)
+        {
+            timerSerialReceiveScaled.Enabled = false;
+            timerChartAddScaled.Enabled = false;
+
+            serialPortMain.DiscardInBuffer();
+            serialPortMain.DiscardOutBuffer();
+        }
+
+        private void buttonSaveData_Click(object sender, EventArgs e)
         {
             // Open directory 
-            openFileDialogMain.InitialDirectory = @"C:\Users\Emma\Desktop\";
-            openFileDialogMain.Filter = "txt files (*.txt)|*.txt|All files (*.*)|*.*";
-            openFileDialogMain.FilterIndex = 2;
-            openFileDialogMain.RestoreDirectory = true;
-            openFileDialogMain.FileName = "";
+            saveFileDialogData.InitialDirectory = @"C:\Users\";
+            saveFileDialogData.Filter = "csv files (*.csv)|*.csv|All files (*.*)|*.*";
+            saveFileDialogData.FilterIndex = 2;
+            saveFileDialogData.RestoreDirectory = true;
+            saveFileDialogData.FileName = "rawdata.csv";
 
-            // Clears the textbox
-            textBoxReceive.Clear();
+            // Default save as txt
+            saveFileDialogData.DefaultExt = "*.csv";
+
+            if (saveFileDialogData.ShowDialog() == DialogResult.OK)
+            {
+                using (StreamWriter streamWritePoints = new StreamWriter(saveFileDialogData.FileName))
+
+                    foreach (MeasurementPointRaw point in allMeasuredPointsRaw)
+                    {
+                        streamWritePoints.WriteLine(point.ToString());
+                    }
+            }
+        }
+
+        private void buttonSaveDataScaled_Click(object sender, EventArgs e)
+        {
+            // Open directory 
+            saveFileDialogData.InitialDirectory = @"C:\Users\";
+            saveFileDialogData.Filter = "csv files (*.csv)|*.csv|All files (*.*)|*.*";
+            saveFileDialogData.FilterIndex = 2;
+            saveFileDialogData.RestoreDirectory = true;
+            saveFileDialogData.FileName = "scaleddata.csv";
+
+            // Default save as txt
+            saveFileDialogData.DefaultExt = "*.csv";
+
+            if (saveFileDialogData.ShowDialog() == DialogResult.OK)
+            {
+                using (StreamWriter streamWritePoints = new StreamWriter(saveFileDialogData.FileName))
+
+                    foreach (MeasurementPointScaled point in allMeasuredPointsScaled)
+                    {
+                        streamWritePoints.WriteLine(point.ToString());
+                    }
+            }
+        }
+
+        public class MeasurementPointRaw
+        {
+            public String time { get; set; }
+            public int raw { get; set; }
+
+            public MeasurementPointRaw(String time, int raw)
+            {
+                this.time = time;
+                this.raw = raw;
+            }
+
+            public override string ToString()
+            {
+                return time + ";" + raw;
+            }
+        }
+
+        public class MeasurementPointScaled
+        {
+            public String time { get; set; }
+            public double scaled { get; set; }
+
+            public MeasurementPointScaled(String time, double scaled)
+            {
+                this.time = time;
+                this.scaled = scaled;
+            }
+
+            public override string ToString()
+            {
+                return time + ";" + scaled;
+            }
+        }
+
+
+        // LOAD from config
+        private void buttonRead_Click(object sender, EventArgs e)
+        {
+            // Open directory 
+            saveFileDialogData.InitialDirectory = @"C:\Users\";
+            saveFileDialogData.Filter = "ssc files (*.ssc)|*.ssc|All files (*.*)|*.*";
+            saveFileDialogData.FilterIndex = 2;
+            saveFileDialogData.RestoreDirectory = true;
+            saveFileDialogData.FileName = "";
 
             // If a directory is picked do this
             if (openFileDialogMain.ShowDialog() == DialogResult.OK)
             {
-                var fileText = File.ReadLines(openFileDialogMain.FileName);
-                string[] separateParts = fileText.ToArray();
+                string receivedConfig = File.ReadAllText(openFileDialogMain.FileName);
 
-                // Writes lines in the textbox
-                foreach (string line in fileText)
-                {
-                    textBoxReceive.AppendText(line + "\r\n");
-                }
+                string[] fromConfig = receivedConfig.Split(';');
 
-                // Changes config for the arduino
-                serialPortMain.PortName = separateParts[0];
-                comboBoxPort.Text = separateParts[0];
-                serialPortMain.BaudRate = int.Parse(separateParts[1]);
-                comboBoxBit.Text = separateParts[1];
+                TextBox[] textboxes = { textBoxTagname,
+                                    textBoxLRV,
+                                    textBoxURV,
+                                    textBoxAL,
+                                    textBoxAH,
+                };
+
+                textBoxTagname.Text = fromConfig[0];
+                textBoxLRV.Text = fromConfig[1];
+                textBoxURV.Text = fromConfig[2];
+                textBoxAL.Text = fromConfig[3];
+                textBoxAH.Text = fromConfig[4];
             }
         }
 
-        // Save configuration
-        private void buttonSaveFile_Click(object sender, EventArgs e)
+
+        // This does nothing seeing as the password is already written in the "writeconf" string
+        private void buttonPassword_Click(object sender, EventArgs e)
         {
-            // Open directory 
-            saveFileDialogMain.InitialDirectory = @"C:\Users\Emma\Desktop\";
-            saveFileDialogMain.Filter = "txt files (*.txt)|*.txt|All files (*.*)|*.*";
-            saveFileDialogMain.FilterIndex = 2;
-            saveFileDialogMain.RestoreDirectory = true;
-            saveFileDialogMain.FileName = "configuration.txt";
+            string passwordString = "";
+            passwordString = textBoxPassword.Text;
+            panelPassword.Visible = false;
+        }
 
-            // Default save as txt
-            saveFileDialogMain.DefaultExt = "*.txt";
+        
 
-            if (saveFileDialogMain.ShowDialog() == DialogResult.OK)
+        // Status timer crash with graph timer and not sure if it works but it's an attempt
+        private void timerStatus_Tick(object sender, EventArgs e)
+        {
+            if (serialPortMain.IsOpen)
             {
-                StreamWriter fileName = new StreamWriter(saveFileDialogMain.FileName);
-              
-                fileName.WriteLine(comboBoxPort.Text);
-                fileName.WriteLine(comboBoxBit.Text);
+                serialPortMain.WriteLine("readstatus");
 
-                fileName.Close();
+                switch (serialPortMain.ReadExisting())
+                {
+                    case "0":
+                        labelStatusChange.Text = "OK";
+                        break;
+                    case "1":
+                        labelStatusChange.Text = "Fail";
+                        break;
+                    case "2":
+                        labelStatusChange.Text = "Alarm Low";
+                        break;
+                    case "3":
+                        labelStatusChange.Text = "Alarm High";
+                        break;
+                    default:
+                        labelStatusChange.Text = "";
+                        break;
+                }
+
             }
         }
     }
 }
-
-/*
- o	Se nåværende configurasjon eller default hvis ingen
-    - send/receive commands, code in arduino
-
-o	Åpne fil og lese data fra fil (hvis fil eksisterer? UH IDK)
-    - #open file -> read and add in textbox //DONE
-o	Endre configuarsjonen
-    - fixed, add more?  //DONE?
-o	Laste opp ny configurasjon til intrument
-    - #upload from file button  //DONE
-o	Lagre «configuration» data til tekstfil
-    - #save config to textfile button   //DONE
-
-o	Legge til feilmeldinger(?) hvis fil er feil yadda yadda
- */
-
-// PLOTTING
