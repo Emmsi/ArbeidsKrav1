@@ -31,12 +31,12 @@ namespace ArbeidsKrav1
         {
             this.components = new System.ComponentModel.Container();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(FormMain));
-            System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea5 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
-            System.Windows.Forms.DataVisualization.Charting.Legend legend5 = new System.Windows.Forms.DataVisualization.Charting.Legend();
-            System.Windows.Forms.DataVisualization.Charting.Series series5 = new System.Windows.Forms.DataVisualization.Charting.Series();
-            System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea6 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
-            System.Windows.Forms.DataVisualization.Charting.Legend legend6 = new System.Windows.Forms.DataVisualization.Charting.Legend();
-            System.Windows.Forms.DataVisualization.Charting.Series series6 = new System.Windows.Forms.DataVisualization.Charting.Series();
+            System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea1 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
+            System.Windows.Forms.DataVisualization.Charting.Legend legend1 = new System.Windows.Forms.DataVisualization.Charting.Legend();
+            System.Windows.Forms.DataVisualization.Charting.Series series1 = new System.Windows.Forms.DataVisualization.Charting.Series();
+            System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea2 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
+            System.Windows.Forms.DataVisualization.Charting.Legend legend2 = new System.Windows.Forms.DataVisualization.Charting.Legend();
+            System.Windows.Forms.DataVisualization.Charting.Series series2 = new System.Windows.Forms.DataVisualization.Charting.Series();
             this.panelButtons = new System.Windows.Forms.Panel();
             this.panelPick = new System.Windows.Forms.Panel();
             this.buttonConfiguration = new System.Windows.Forms.Button();
@@ -322,17 +322,17 @@ namespace ArbeidsKrav1
             // 
             // chartRaw
             // 
-            chartArea5.Name = "ChartArea1";
-            this.chartRaw.ChartAreas.Add(chartArea5);
-            legend5.Name = "Legend1";
-            this.chartRaw.Legends.Add(legend5);
+            chartArea1.Name = "ChartArea1";
+            this.chartRaw.ChartAreas.Add(chartArea1);
+            legend1.Name = "Legend1";
+            this.chartRaw.Legends.Add(legend1);
             this.chartRaw.Location = new System.Drawing.Point(2, 57);
             this.chartRaw.Name = "chartRaw";
-            series5.ChartArea = "ChartArea1";
-            series5.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.Line;
-            series5.Legend = "Legend1";
-            series5.Name = "Raw Data";
-            this.chartRaw.Series.Add(series5);
+            series1.ChartArea = "ChartArea1";
+            series1.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.Line;
+            series1.Legend = "Legend1";
+            series1.Name = "Raw Data";
+            this.chartRaw.Series.Add(series1);
             this.chartRaw.Size = new System.Drawing.Size(587, 316);
             this.chartRaw.TabIndex = 0;
             this.chartRaw.Text = "chartMain";
@@ -345,10 +345,10 @@ namespace ArbeidsKrav1
             this.tabPageScaled.Controls.Add(this.textBoxDataScaled);
             this.tabPageScaled.Controls.Add(this.chartScaled);
             this.tabPageScaled.Font = new System.Drawing.Font("Century Gothic", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.tabPageScaled.Location = new System.Drawing.Point(4, 25);
+            this.tabPageScaled.Location = new System.Drawing.Point(4, 33);
             this.tabPageScaled.Name = "tabPageScaled";
             this.tabPageScaled.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPageScaled.Size = new System.Drawing.Size(823, 439);
+            this.tabPageScaled.Size = new System.Drawing.Size(823, 431);
             this.tabPageScaled.TabIndex = 1;
             this.tabPageScaled.Text = "Scaled Data";
             this.tabPageScaled.UseVisualStyleBackColor = true;
@@ -397,17 +397,17 @@ namespace ArbeidsKrav1
             // 
             // chartScaled
             // 
-            chartArea6.Name = "ChartArea1";
-            this.chartScaled.ChartAreas.Add(chartArea6);
-            legend6.Name = "Legend1";
-            this.chartScaled.Legends.Add(legend6);
+            chartArea2.Name = "ChartArea1";
+            this.chartScaled.ChartAreas.Add(chartArea2);
+            legend2.Name = "Legend1";
+            this.chartScaled.Legends.Add(legend2);
             this.chartScaled.Location = new System.Drawing.Point(2, 57);
             this.chartScaled.Name = "chartScaled";
-            series6.ChartArea = "ChartArea1";
-            series6.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.Line;
-            series6.Legend = "Legend1";
-            series6.Name = "Scaled Data";
-            this.chartScaled.Series.Add(series6);
+            series2.ChartArea = "ChartArea1";
+            series2.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.Line;
+            series2.Legend = "Legend1";
+            series2.Name = "Scaled Data";
+            this.chartScaled.Series.Add(series2);
             this.chartScaled.Size = new System.Drawing.Size(587, 316);
             this.chartScaled.TabIndex = 1;
             this.chartScaled.Text = "chartMain";
@@ -813,9 +813,9 @@ namespace ArbeidsKrav1
             this.BackColor = System.Drawing.Color.DarkGray;
             this.ClientSize = new System.Drawing.Size(1091, 605);
             this.Controls.Add(this.panelButtons);
-            this.Controls.Add(this.panelData);
             this.Controls.Add(this.panelConfiguration);
             this.Controls.Add(this.panelDashboard);
+            this.Controls.Add(this.panelData);
             this.Font = new System.Drawing.Font("Arial Narrow", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedToolWindow;
             this.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
